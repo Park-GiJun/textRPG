@@ -1,0 +1,89 @@
+spring:
+  application:
+    name: textRPG
+  profiles:
+    active: local
+  
+  # R2DBC 설정
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/textrpg
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
+    pool:
+      initial-size: 10
+      max-size: 30
+      max-idle-time: 30m
+      validation-query: SELECT 1
+  
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 5
+  
+  # Kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: textrpg-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.gijun.textrpg"
+
+# 서버 설정
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Security 설정
+jwt:
+  secret: ${JWT_SECRET:your-secret-key}
+  expiration: 86400000 # 24시간
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging 설정
+logging:
+  level:
+    com.gijun.textrpg: DEBUG
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.mysql: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Sentry 설정
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SPRING_PROFILES_ACTIVE:local}
+
+# Slack 설정
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL:}
+
+# API Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

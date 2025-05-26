@@ -1,0 +1,29 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/textrpg
+    username: root
+    password: password
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    com.gijun.textrpg: DEBUG
+    org.springframework: DEBUG
+    io.r2dbc: DEBUG
+
+# 로컬 개발용 JWT
+jwt:
+  secret: local-dev-secret-key-for-testing
+  expiration: 86400000
+
+# Swagger UI 활성화
+springdoc:
+  swagger-ui:
+    enabled: true

@@ -1,0 +1,56 @@
+spring:
+  r2dbc:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    pool:
+      initial-size: 20
+      max-size: 100
+      max-idle-time: 30m
+  
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 10
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    com.gijun.textrpg: INFO
+    org.springframework: WARN
+
+# Production JWT
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# Sentry
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: production
+  traces-sample-rate: 0.1
+
+# Slack
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL}
+
+# Swagger UI 비활성화
+springdoc:
+  swagger-ui:
+    enabled: false
