@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.5.0"
+    id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -51,7 +51,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     
     // API Documentation
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
     
     // Logging
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
