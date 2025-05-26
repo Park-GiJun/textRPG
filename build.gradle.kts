@@ -35,8 +35,12 @@ dependencies {
     
     // Database
     implementation("io.r2dbc:r2dbc-pool")
-    implementation("dev.miku:r2dbc-mysql:0.8.2.RELEASE")
+    implementation("io.asyncer:r2dbc-mysql:1.0.5")
     implementation("mysql:mysql-connector-java:8.0.33")
+    
+    // Flyway
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
     
     // Kafka
     implementation("org.springframework.kafka:spring-kafka")

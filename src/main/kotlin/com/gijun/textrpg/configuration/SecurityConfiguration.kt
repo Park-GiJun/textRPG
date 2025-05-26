@@ -36,11 +36,11 @@ class SecurityConfiguration(
                     // Public endpoints
                     .pathMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                     .pathMatchers(HttpMethod.GET, "/api/v1/health", "/actuator/**").permitAll()
-                    .pathMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    .pathMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
                     .pathMatchers("/ws/**").permitAll() // WebSocket endpoints
                     // Protected endpoints
                     .pathMatchers("/api/v1/**").authenticated()
-                    .anyExchange().authenticated()
+                    .anyExchange().permitAll() // 나머지는 일단 허용
             }
             .build()
     }
