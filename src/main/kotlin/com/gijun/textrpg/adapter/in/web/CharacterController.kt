@@ -6,12 +6,16 @@ import com.gijun.textrpg.adapter.`in`.web.dto.CharacterResponse
 import com.gijun.textrpg.application.port.`in`.CreateCharacterCommand
 import com.gijun.textrpg.application.port.`in`.ManageCharacterUseCase
 import com.gijun.textrpg.application.port.`in`.UpdateCharacterCommand
+import com.gijun.textrpg.application.port.out.UserRepository
+import com.gijun.textrpg.configuration.JwtUtil
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -19,15 +23,16 @@ import org.springframework.web.bind.annotation.*
 class CharacterController(
     private val manageCharacterUseCase: ManageCharacterUseCase,
     private val requestMapper: CharacterRequestMapper,
-    private val responseMapper: CharacterResponseMapper
+    private val responseMapper: CharacterResponseMapper,
+    private val userRepository: UserRepository,
+    private val jwtUtil: JwtUtil
 ) {
 
     @PostMapping
     suspend fun createCharacter(
-        @Valid @RequestBody request: CreateCharacterRequest,
-        @RequestHeader("Authorization") authHeader: String
+        @Valid @RequestBody request: CreateCharacterRequest
     ): ResponseEntity<CharacterResponse> {
-        val userId = extractUserIdFromToken(authHeader)
+        val userId = getCurrentUserId()
         val command = requestMapper.toCreateCommand(userId, request)
         val character = manageCharacterUseCase.createCharacter(command)
         
@@ -58,10 +63,8 @@ class CharacterController(
     }
 
     @GetMapping("/my")
-    suspend fun getMyCharacters(
-        @RequestHeader("Authorization") authHeader: String
-    ): Flow<CharacterResponse> {
-        val userId = extractUserIdFromToken(authHeader)
+    suspend fun getMyCharacters(): Flow<CharacterResponse> {
+        val userId = getCurrentUserId()
         return manageCharacterUseCase.getCharactersByUser(userId)
             .map { responseMapper.toResponse(it) }
     }
@@ -69,16 +72,10 @@ class CharacterController(
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     suspend fun deleteCharacter(
-        @PathVariable id: String,
-        @RequestHeader("Authorization") authHeader: String
+        @PathVariable id: String
     ) {
-        val userId = extractUserIdFromToken(authHeader)
+        val userId = getCurrentUserId()
         manageCharacterUseCase.deleteCharacter(id, userId)
-    }
-
-    private fun extractUserIdFromToken(authHeader: String): String {
-        // 임시로 하드코딩, 추후 JWT 파싱 로직으로 교체
-        return "temp-user-id"
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -91,5 +88,17 @@ class CharacterController(
     fun streamCharacters(): Flow<CharacterResponse> {
         return manageCharacterUseCase.getAllCharacters()
             .map { responseMapper.toResponse(it) }
+    }
+
+    private suspend fun getCurrentUserId(): String {
+        return ReactiveSecurityContextHolder.getContext()
+            .cast(org.springframework.security.core.context.SecurityContext::class.java)
+            .map { it.authentication?.name }
+            .awaitSingle()
+            ?.let { username -> 
+                userRepository.findByUsername(username)?.id 
+                    ?: throw RuntimeException("User not found: $username")
+            }
+            ?: throw RuntimeException("User not authenticated")
     }
 }

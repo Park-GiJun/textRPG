@@ -13,6 +13,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.config.TopicBuilder
 import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
@@ -66,17 +67,25 @@ class KafkaConfiguration(
         return KafkaTemplate(producerFactory())
     }
 
-    // Consumer Configuration
+    // Consumer Configuration with Error Handling
     @Bean
     fun consumerFactory(): ConsumerFactory<String, Any> {
         val props = HashMap<String, Any>()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafkaProperties.bootstrapServers
         props[ConsumerConfig.GROUP_ID_CONFIG] = kafkaProperties.consumer.groupId
-        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         props[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
-        props[JsonDeserializer.TRUSTED_PACKAGES] = "com.gijun.textrpg"
+        
+        // Error Handling Deserializer 설정
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = ErrorHandlingDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = ErrorHandlingDeserializer::class.java
+        
+        // 실제 Deserializer 설정
+        props[ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS] = StringDeserializer::class.java
+        props[ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS] = JsonDeserializer::class.java
+        
+        // JSON Deserializer 신뢰 패키지 설정 - 모든 클래스 허용
+        props[JsonDeserializer.TRUSTED_PACKAGES] = "*"
         
         return DefaultKafkaConsumerFactory(props)
     }
@@ -92,7 +101,7 @@ class KafkaConfiguration(
     }
 }
 
-// Custom Error Handler
+// Custom Error Handler - 기본 설정만 사용
 class KafkaErrorHandler : org.springframework.kafka.listener.DefaultErrorHandler() {
     init {
         // Configure retry and DLQ behavior

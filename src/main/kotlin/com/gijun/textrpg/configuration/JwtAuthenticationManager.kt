@@ -33,7 +33,9 @@ class JwtAuthenticationManager(
             
             val authorities = user.roles.map { SimpleGrantedAuthority("ROLE_${it.name}") }
             
-            UsernamePasswordAuthenticationToken(user.username, null, authorities)
+            UsernamePasswordAuthenticationToken(user.username, null, authorities) as Authentication
+        }.onErrorResume { 
+            Mono.empty() // 인증 실패 시 빈 Mono 반환
         }
     }
 }

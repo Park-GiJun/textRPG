@@ -1,5 +1,6 @@
 package com.gijun.textrpg.adapter.out.persistence
 
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 

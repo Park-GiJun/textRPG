@@ -18,7 +18,8 @@ class JwtAuthenticationConverter : ServerAuthenticationConverter {
     override fun convert(exchange: ServerWebExchange): Mono<Authentication> {
         return Mono.justOrEmpty(exchange.request.headers.getFirst(HttpHeaders.AUTHORIZATION))
             .filter { it.startsWith(BEARER_PREFIX) }
-            .map { it.substring(BEARER_PREFIX.length) }
-            .map { UsernamePasswordAuthenticationToken(it, it) }
+            .map { it.substring(BEARER_PREFIX.length).trim() }
+            .filter { it.isNotBlank() }
+            .map { token -> UsernamePasswordAuthenticationToken(token, token) }
     }
 }
