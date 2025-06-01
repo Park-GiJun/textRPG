@@ -1,13 +1,8 @@
--- Character table with new structure
+-- Character table (simplified)
 CREATE TABLE IF NOT EXISTS characters (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     level INT NOT NULL DEFAULT 1,
-    
-    -- Experience fields
-    current_experience BIGINT NOT NULL DEFAULT 0,
-    max_experience BIGINT NOT NULL DEFAULT 100,
-    experience_for_next_level BIGINT NOT NULL DEFAULT 100,
     
     -- Health fields
     current_health INT NOT NULL,

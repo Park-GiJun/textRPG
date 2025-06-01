@@ -1,5 +1,6 @@
 package com.gijun.textrpg.adapter.`in`.web
 
+import com.gijun.textrpg.application.port.out.CharacterCachePort
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -8,13 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/v1/health")
 class HealthController(
     private val databaseClient: DatabaseClient,
-    private val redisTemplate: ReactiveRedisTemplate<String, Any>
+    private val redisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val characterCache: CharacterCachePort
 ) {
 
     @GetMapping
@@ -25,7 +28,8 @@ class HealthController(
             services = mapOf(
                 "api" to "UP",
                 "database" to checkDatabase(),
-                "redis" to checkRedis()
+                "redis" to checkRedis(),
+                "cache" to checkCache()
             )
         )
     }
@@ -50,6 +54,26 @@ class HealthController(
                 .map { "UP" }
                 .onErrorReturn("DOWN")
                 .block() ?: "DOWN"
+        } catch (e: Exception) {
+            "DOWN"
+        }
+    }
+
+    private suspend fun checkCache(): String {
+        return try {
+            // 캐시에 테스트 데이터 저장/조회해서 정상 작동 확인
+            val testKey = "health-check-${System.currentTimeMillis()}"
+            redisTemplate.opsForValue()
+                .set(testKey, "test", Duration.ofSeconds(5))
+                .block()
+            
+            val result = redisTemplate.opsForValue()
+                .get(testKey)
+                .block()
+            
+            redisTemplate.delete(testKey).block()
+            
+            if (result == "test") "UP" else "DOWN"
         } catch (e: Exception) {
             "DOWN"
         }

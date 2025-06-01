@@ -2,18 +2,9 @@ package com.gijun.textrpg.adapter.out.persistence
 
 import com.gijun.textrpg.application.port.out.CharacterRepository
 import com.gijun.textrpg.domain.character.Character
-import com.gijun.textrpg.domain.character.Experience
-import com.gijun.textrpg.domain.character.Health
-import com.gijun.textrpg.domain.character.Stats
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Version
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
 class CharacterRepositoryImpl(
@@ -58,113 +49,5 @@ class CharacterRepositoryImpl(
 
     override suspend fun count(): Long {
         return r2dbcRepository.count()
-    }
-}
-
-// R2DBC Repository Interface
-interface CharacterR2dbcRepository : CoroutineCrudRepository<CharacterEntity, String> {
-    suspend fun findByName(name: String): CharacterEntity?
-    suspend fun existsByName(name: String): Boolean
-    fun findByLevelBetween(minLevel: Int, maxLevel: Int): Flow<CharacterEntity>
-}
-
-// Entity for R2DBC
-@Table("characters")
-data class CharacterEntity(
-    @Id
-    val id: String,
-    
-    @Column("name")
-    val name: String,
-    
-    @Column("level")
-    val level: Int,
-    
-    // Experience fields
-    @Column("current_experience")
-    val currentExperience: Long,
-    
-    @Column("max_experience")
-    val maxExperience: Long,
-    
-    @Column("experience_for_next_level")
-    val experienceForNextLevel: Long,
-    
-    // Health fields
-    @Column("current_health")
-    val currentHealth: Int,
-    
-    @Column("max_health")
-    val maxHealth: Int,
-    
-    // Stats fields
-    @Column("strength")
-    val strength: Int,
-    
-    @Column("dexterity")
-    val dexterity: Int,
-    
-    @Column("intelligence")
-    val intelligence: Int,
-    
-    @Column("luck")
-    val luck: Int,
-    
-    @Column("created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now(),
-    
-    @Column("updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
-    
-    @Version
-    val version: Long? = null
-)
-
-// Mapper between Domain and Entity
-@Component
-class CharacterMapper {
-    
-    fun toDomain(entity: CharacterEntity): Character {
-        return Character(
-            id = entity.id,
-            name = entity.name,
-            level = entity.level,
-            experience = Experience(
-                current = entity.currentExperience,
-                max = entity.maxExperience,
-                forNextLevel = entity.experienceForNextLevel
-            ),
-            health = Health(
-                current = entity.currentHealth,
-                max = entity.maxHealth
-            ),
-            stats = Stats(
-                strength = entity.strength,
-                dexterity = entity.dexterity,
-                intelligence = entity.intelligence,
-                luck = entity.luck
-            ),
-            createdAt = entity.createdAt,
-            updatedAt = entity.updatedAt
-        )
-    }
-    
-    fun toEntity(domain: Character): CharacterEntity {
-        return CharacterEntity(
-            id = domain.id,
-            name = domain.name,
-            level = domain.level,
-            currentExperience = domain.experience.current,
-            maxExperience = domain.experience.max,
-            experienceForNextLevel = domain.experience.forNextLevel,
-            currentHealth = domain.health.current,
-            maxHealth = domain.health.max,
-            strength = domain.stats.strength,
-            dexterity = domain.stats.dexterity,
-            intelligence = domain.stats.intelligence,
-            luck = domain.stats.luck,
-            createdAt = domain.createdAt,
-            updatedAt = domain.updatedAt
-        )
     }
 }

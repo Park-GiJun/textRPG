@@ -16,8 +16,6 @@ interface ManageCharacterUseCase {
     suspend fun deleteCharacter(characterId: String)
     
     fun getAllCharacters(): Flow<Character>
-    
-    suspend fun gainExperience(characterId: String, amount: Long): Character
 }
 
 // Command objects for use cases
