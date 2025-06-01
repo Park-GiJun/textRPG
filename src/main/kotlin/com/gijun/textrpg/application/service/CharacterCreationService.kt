@@ -17,9 +17,9 @@ class CharacterCreationService(
     private val logger = LoggerFactory.getLogger(CharacterCreationService::class.java)
 
     suspend fun createCharacter(command: CreateCharacterCommand): Character {
-        logger.info("Creating character with name: ${command.name}")
+        logger.info("Creating character with name: ${command.name} for user: ${command.userId}")
 
-        validateCharacterName(command.name)
+        validateCharacterName(command)
         
         val character = createCharacterDomain(command)
         val savedCharacter = characterRepository.save(character)
@@ -28,23 +28,23 @@ class CharacterCreationService(
         characterCache.saveCharacter(savedCharacter)
         
         // 도메인 이벤트 발행
-        eventPublisher.publishCharacterCreated(savedCharacter.id, savedCharacter.name)
+        eventPublisher.publishCharacterCreated(savedCharacter.id, savedCharacter.name, savedCharacter.stats)
 
         logger.info("Character created successfully: ${savedCharacter.id}")
         return savedCharacter
     }
 
-    private suspend fun validateCharacterName(name: String) {
-        if (characterRepository.existsByName(name)) {
-            throw CharacterAlreadyExistsException("Character with name '$name' already exists")
+    private suspend fun validateCharacterName(command: CreateCharacterCommand) {
+        if (characterRepository.existsByUserIdAndName(command.userId, command.name)) {
+            throw CharacterAlreadyExistsException("Character with name '${command.name}' already exists for this user")
         }
     }
 
     private fun createCharacterDomain(command: CreateCharacterCommand): Character {
         return if (command.customStats != null) {
-            Character.create(name = command.name, initialStats = command.customStats)
+            Character.create(userId = command.userId, name = command.name, initialStats = command.customStats)
         } else {
-            Character.create(name = command.name)
+            Character.create(userId = command.userId, name = command.name)
         }
     }
 }

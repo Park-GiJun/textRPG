@@ -9,4 +9,6 @@ interface CharacterR2dbcRepository : CoroutineCrudRepository<CharacterEntity, St
     suspend fun findByName(name: String): CharacterEntity?
     suspend fun existsByName(name: String): Boolean
     fun findByLevelBetween(minLevel: Int, maxLevel: Int): Flow<CharacterEntity>
+    fun findByUserId(userId: String): Flow<CharacterEntity>
+    suspend fun existsByUserIdAndName(userId: String, name: String): Boolean
 }

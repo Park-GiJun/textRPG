@@ -1,7 +1,10 @@
 package com.gijun.textrpg.common.exception
 
+import com.gijun.textrpg.application.service.AuthenticationException
 import com.gijun.textrpg.application.service.CharacterAlreadyExistsException
 import com.gijun.textrpg.application.service.CharacterNotFoundException
+import com.gijun.textrpg.application.service.UserAlreadyExistsException
+import com.gijun.textrpg.application.service.UserNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -37,6 +40,45 @@ class GlobalExceptionHandler {
                 status = HttpStatus.CONFLICT.value(),
                 error = "Conflict",
                 message = ex.message ?: "Character already exists",
+                path = null
+            ))
+    }
+
+    @ExceptionHandler(AuthenticationException::class)
+    suspend fun handleAuthentication(ex: AuthenticationException): ResponseEntity<ErrorResponse> {
+        logger.warn("Authentication failed: ${ex.message}")
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse(
+                status = HttpStatus.UNAUTHORIZED.value(),
+                error = "Unauthorized",
+                message = ex.message ?: "Authentication failed",
+                path = null
+            ))
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException::class)
+    suspend fun handleUserAlreadyExists(ex: UserAlreadyExistsException): ResponseEntity<ErrorResponse> {
+        logger.warn("User already exists: ${ex.message}")
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(ErrorResponse(
+                status = HttpStatus.CONFLICT.value(),
+                error = "Conflict",
+                message = ex.message ?: "User already exists",
+                path = null
+            ))
+    }
+
+    @ExceptionHandler(UserNotFoundException::class)
+    suspend fun handleUserNotFound(ex: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        logger.warn("User not found: ${ex.message}")
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ErrorResponse(
+                status = HttpStatus.NOT_FOUND.value(),
+                error = "Not Found",
+                message = ex.message ?: "User not found",
                 path = null
             ))
     }

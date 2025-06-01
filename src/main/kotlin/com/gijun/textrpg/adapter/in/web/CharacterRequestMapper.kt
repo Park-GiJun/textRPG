@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class CharacterRequestMapper {
     
-    fun toCreateCommand(request: CreateCharacterRequest): CreateCharacterCommand {
+    fun toCreateCommand(userId: String, request: CreateCharacterRequest): CreateCharacterCommand {
         val customStats = if (hasCustomStats(request)) {
             Stats(
                 strength = request.strength ?: 10,
@@ -21,6 +21,7 @@ class CharacterRequestMapper {
         } else null
 
         return CreateCharacterCommand(
+            userId = userId,
             name = request.name,
             customStats = customStats
         )

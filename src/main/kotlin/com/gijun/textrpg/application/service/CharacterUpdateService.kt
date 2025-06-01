@@ -40,11 +40,15 @@ class CharacterUpdateService(
         return savedCharacter
     }
 
-    suspend fun deleteCharacter(characterId: String) {
-        logger.info("Deleting character: $characterId")
+    suspend fun deleteCharacter(characterId: String, userId: String) {
+        logger.info("Deleting character: $characterId for user: $userId")
 
-        if (!characterQueryService.characterExists(characterId)) {
-            throw CharacterNotFoundException("Character not found: $characterId")
+        val character = characterQueryService.getCharacter(characterId)
+            ?: throw CharacterNotFoundException("Character not found: $characterId")
+        
+        // 캐릭터 소유권 확인
+        if (character.userId != userId) {
+            throw CharacterAccessDeniedException("You don't have permission to delete this character")
         }
 
         characterRepository.deleteById(characterId)

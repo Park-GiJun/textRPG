@@ -6,3 +6,4 @@ sealed class CharacterServiceException(message: String) : RuntimeException(messa
 class CharacterNotFoundException(message: String) : CharacterServiceException(message)
 class CharacterAlreadyExistsException(message: String) : CharacterServiceException(message)
 class InvalidCharacterDataException(message: String) : CharacterServiceException(message)
+class CharacterAccessDeniedException(message: String) : CharacterServiceException(message)

@@ -35,6 +35,11 @@ class CharacterRepositoryImpl(
             .map { characterMapper.toDomain(it) }
     }
 
+    override fun findByUserId(userId: String): Flow<Character> {
+        return r2dbcRepository.findByUserId(userId)
+            .map { characterMapper.toDomain(it) }
+    }
+
     override suspend fun deleteById(id: String) {
         r2dbcRepository.deleteById(id)
     }
@@ -45,6 +50,10 @@ class CharacterRepositoryImpl(
 
     override suspend fun existsByName(name: String): Boolean {
         return r2dbcRepository.existsByName(name)
+    }
+    
+    override suspend fun existsByUserIdAndName(userId: String, name: String): Boolean {
+        return r2dbcRepository.existsByUserIdAndName(userId, name)
     }
 
     override suspend fun count(): Long {

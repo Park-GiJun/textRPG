@@ -1,6 +1,7 @@
 package com.gijun.textrpg.adapter.`in`.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.gijun.textrpg.adapter.`in`.web.dto.CreateCharacterRequest
 import com.gijun.textrpg.application.service.CharacterService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

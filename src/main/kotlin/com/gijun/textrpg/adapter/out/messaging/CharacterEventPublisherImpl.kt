@@ -19,10 +19,11 @@ class CharacterEventPublisherImpl(
         private const val NOTIFICATION_TOPIC = "notifications"
     }
 
-    override suspend fun publishCharacterCreated(characterId: String, name: String) {
+    override suspend fun publishCharacterCreated(characterId: String, name: String, stats: com.gijun.textrpg.domain.character.Stats) {
         val event = CharacterEvent.CharacterCreated(
             characterId = characterId,
-            name = name
+            name = name,
+            stats = stats
         )
         
         publishEvent(event)
@@ -31,7 +32,7 @@ class CharacterEventPublisherImpl(
 
     override suspend fun publishCharacterLeveledUp(characterId: String, oldLevel: Int, newLevel: Int) {
         // 현재는 레벨업이 없지만 미래를 위해 구현
-        val notification = "캐릭터가 레벨 {$oldLevel}에서 {$newLevel}로 레벨업했습니다!"
+        val notification = "캐릭터가 레벨 '$oldLevel'에서 '$newLevel'로 레벨업했습니다!"
         publishNotification(notification, characterId)
     }
 

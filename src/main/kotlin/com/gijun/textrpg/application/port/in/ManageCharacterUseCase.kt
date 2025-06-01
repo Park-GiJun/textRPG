@@ -11,19 +11,23 @@ interface ManageCharacterUseCase {
     
     suspend fun getCharacter(characterId: String): Character?
     
+    suspend fun getCharactersByUser(userId: String): Flow<Character>
+    
     suspend fun updateCharacter(command: UpdateCharacterCommand): Character
     
-    suspend fun deleteCharacter(characterId: String)
+    suspend fun deleteCharacter(characterId: String, userId: String) // 사용자 확인 추가
     
     fun getAllCharacters(): Flow<Character>
 }
 
 // Command objects for use cases
 data class CreateCharacterCommand(
+    val userId: String, // 캐릭터를 생성할 사용자 ID
     val name: String,
     val customStats: Stats? = null // null이면 기본 스탯 사용
 ) {
     init {
+        require(userId.isNotBlank()) { "User ID cannot be blank" }
         require(name.isNotBlank()) { "Name cannot be blank" }
         require(name.length <= 50) { "Name cannot exceed 50 characters" }
         require(!name.matches(Regex(".*[<>\"'&].*"))) { "Name contains invalid characters" }

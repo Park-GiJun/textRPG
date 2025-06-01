@@ -6,39 +6,25 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
-@Table("characters")
-data class CharacterEntity(
+@Table("users")
+data class UserEntity(
     @Id
     val id: String,
     
-    @Column("user_id")
-    val userId: String,
+    @Column("username")
+    val username: String,
     
-    @Column("name")
-    val name: String,
+    @Column("email")
+    val email: String,
     
-    @Column("level")
-    val level: Int,
+    @Column("password_hash")
+    val passwordHash: String,
     
-    // Health fields
-    @Column("current_health")
-    val currentHealth: Int,
+    @Column("roles")
+    val roles: String, // JSON 형태로 저장
     
-    @Column("max_health")
-    val maxHealth: Int,
-    
-    // Stats fields
-    @Column("strength")
-    val strength: Int,
-    
-    @Column("dexterity")
-    val dexterity: Int,
-    
-    @Column("intelligence")
-    val intelligence: Int,
-    
-    @Column("luck")
-    val luck: Int,
+    @Column("is_active")
+    val isActive: Boolean = true,
     
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),

@@ -28,8 +28,12 @@ class CharacterService(
         return characterUpdateService.updateCharacter(command)
     }
 
-    override suspend fun deleteCharacter(characterId: String) {
-        characterUpdateService.deleteCharacter(characterId)
+    override suspend fun getCharactersByUser(userId: String): Flow<Character> {
+        return characterQueryService.getCharactersByUser(userId)
+    }
+
+    override suspend fun deleteCharacter(characterId: String, userId: String) {
+        characterUpdateService.deleteCharacter(characterId, userId)
     }
 
     override fun getAllCharacters(): Flow<Character> {

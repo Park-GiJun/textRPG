@@ -24,9 +24,11 @@ class CharacterController(
 
     @PostMapping
     suspend fun createCharacter(
-        @Valid @RequestBody request: CreateCharacterRequest
+        @Valid @RequestBody request: CreateCharacterRequest,
+        @RequestHeader("Authorization") authHeader: String
     ): ResponseEntity<CharacterResponse> {
-        val command = requestMapper.toCreateCommand(request)
+        val userId = extractUserIdFromToken(authHeader)
+        val command = requestMapper.toCreateCommand(userId, request)
         val character = manageCharacterUseCase.createCharacter(command)
         
         return ResponseEntity
@@ -55,10 +57,28 @@ class CharacterController(
         return ResponseEntity.ok(responseMapper.toResponse(character))
     }
 
+    @GetMapping("/my")
+    suspend fun getMyCharacters(
+        @RequestHeader("Authorization") authHeader: String
+    ): Flow<CharacterResponse> {
+        val userId = extractUserIdFromToken(authHeader)
+        return manageCharacterUseCase.getCharactersByUser(userId)
+            .map { responseMapper.toResponse(it) }
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    suspend fun deleteCharacter(@PathVariable id: String) {
-        manageCharacterUseCase.deleteCharacter(id)
+    suspend fun deleteCharacter(
+        @PathVariable id: String,
+        @RequestHeader("Authorization") authHeader: String
+    ) {
+        val userId = extractUserIdFromToken(authHeader)
+        manageCharacterUseCase.deleteCharacter(id, userId)
+    }
+
+    private fun extractUserIdFromToken(authHeader: String): String {
+        // 임시로 하드코딩, 추후 JWT 파싱 로직으로 교체
+        return "temp-user-id"
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])

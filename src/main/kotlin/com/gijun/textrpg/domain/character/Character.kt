@@ -6,6 +6,7 @@ import java.util.UUID
 // 캐릭터 도메인 Entity
 data class Character(
     val id: String = UUID.randomUUID().toString(),
+    val userId: String, // 소유자 사용자 ID
     val name: String,
     val level: Int = 1,
     val health: Health,
@@ -36,6 +37,7 @@ data class Character(
     companion object {
         // 캐릭터 생성 팩토리 메서드
         fun create(
+            userId: String,
             name: String,
             initialStats: Stats = Stats(
                 strength = 10,
@@ -47,6 +49,7 @@ data class Character(
             val maxHealth = calculateMaxHealth(1, initialStats.intelligence)
             
             return Character(
+                userId = userId,
                 name = name,
                 health = Health(current = maxHealth, max = maxHealth),
                 stats = initialStats

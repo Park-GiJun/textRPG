@@ -41,6 +41,15 @@ class CharacterQueryService(
             }
     }
 
+    suspend fun getCharactersByUser(userId: String): Flow<Character> {
+        logger.debug("Querying characters for user: $userId")
+        return characterRepository.findByUserId(userId)
+            .onEach { character ->
+                // 스트리밍하면서 각 캐릭터를 캐시에 저장
+                characterCache.saveCharacter(character)
+            }
+    }
+
     suspend fun getCharacterByName(name: String): Character? {
         logger.debug("Querying character by name: $name")
         

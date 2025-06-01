@@ -11,6 +11,7 @@ class CharacterMapper {
     fun toDomain(entity: CharacterEntity): Character {
         return Character(
             id = entity.id,
+            userId = entity.userId,
             name = entity.name,
             level = entity.level,
             health = Health(
@@ -31,6 +32,7 @@ class CharacterMapper {
     fun toEntity(domain: Character): CharacterEntity {
         return CharacterEntity(
             id = domain.id,
+            userId = domain.userId,
             name = domain.name,
             level = domain.level,
             currentHealth = domain.health.current,

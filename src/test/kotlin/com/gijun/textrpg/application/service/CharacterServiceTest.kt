@@ -1,6 +1,8 @@
 package com.gijun.textrpg.application.service
 
 import com.gijun.textrpg.application.port.`in`.CreateCharacterCommand
+import com.gijun.textrpg.application.port.out.CharacterCachePort
+import com.gijun.textrpg.application.port.out.CharacterEventPublisher
 import com.gijun.textrpg.application.port.out.CharacterRepository
 import com.gijun.textrpg.domain.character.Character
 import com.gijun.textrpg.domain.character.Health
@@ -18,12 +20,24 @@ import kotlin.test.assertNotNull
 class CharacterServiceTest {
 
     private lateinit var characterRepository: CharacterRepository
+    private lateinit var characterCache: CharacterCachePort
+    private lateinit var eventPublisher: CharacterEventPublisher
+    private lateinit var characterCreationService: CharacterCreationService
+    private lateinit var characterQueryService: CharacterQueryService
+    private lateinit var characterUpdateService: CharacterUpdateService
     private lateinit var characterService: CharacterService
 
     @BeforeEach
     fun setup() {
         characterRepository = mockk()
-        characterService = CharacterService(characterRepository)
+        characterCache = mockk()
+        eventPublisher = mockk()
+        
+        characterCreationService = CharacterCreationService(characterRepository, characterCache, eventPublisher)
+        characterQueryService = CharacterQueryService(characterRepository, characterCache)
+        characterUpdateService = CharacterUpdateService(characterRepository, characterCache, eventPublisher, characterQueryService)
+        
+        characterService = CharacterService(characterCreationService, characterQueryService, characterUpdateService)
     }
 
     @Test
@@ -34,6 +48,8 @@ class CharacterServiceTest {
 
         coEvery { characterRepository.existsByName("TestHero") } returns false
         coEvery { characterRepository.save(any()) } returns expectedCharacter
+        coEvery { characterCache.saveCharacter(any()) } just Runs
+        coEvery { eventPublisher.publishCharacterCreated(any(), any(), any()) } just Runs
 
         // When
         val result = characterService.createCharacter(command)
@@ -45,6 +61,8 @@ class CharacterServiceTest {
 
         coVerify { characterRepository.existsByName("TestHero") }
         coVerify { characterRepository.save(any()) }
+        coVerify { characterCache.saveCharacter(any()) }
+        coVerify { eventPublisher.publishCharacterCreated(any(), any(), any()) }
     }
 
     @Test
@@ -69,7 +87,9 @@ class CharacterServiceTest {
         val characterId = "test-id"
         val character = createTestCharacter(id = characterId)
 
+        coEvery { characterCache.getCharacter(characterId) } returns null
         coEvery { characterRepository.findById(characterId) } returns character
+        coEvery { characterCache.saveCharacter(any()) } just Runs
 
         // When
         val result = characterService.getCharacter(characterId)
@@ -79,6 +99,7 @@ class CharacterServiceTest {
         assertEquals(characterId, result.id)
 
         coVerify { characterRepository.findById(characterId) }
+        coVerify { characterCache.saveCharacter(any()) }
     }
 
     @Test
@@ -91,6 +112,7 @@ class CharacterServiceTest {
         )
 
         every { characterRepository.findAll() } returns flowOf(*characters.toTypedArray())
+        coEvery { characterCache.saveCharacter(any()) } just Runs
 
         // When
         val result = characterService.getAllCharacters().toList()
