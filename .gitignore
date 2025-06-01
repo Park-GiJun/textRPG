@@ -44,3 +44,4 @@ logs/
 *.log
 *.log.gz
 !/frontend/node_modules/
+/frontend/node_modules/
