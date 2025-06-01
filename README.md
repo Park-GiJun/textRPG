@@ -71,7 +71,12 @@ src/main/kotlin/com/gijun/textrpg/
 docker-compose up -d mysql redis elasticsearch kafka
 ```
 
-2. 환경 변수 설정
+2. 로그 디렉토리 생성
+```bash
+mkdir logs  # Windows: md logs
+```
+
+3. 환경 변수 설정
 ```bash
 export DB_USERNAME=root
 export DB_PASSWORD=password
@@ -80,10 +85,22 @@ export SENTRY_DSN=your-sentry-dsn
 export SLACK_WEBHOOK_URL=your-webhook-url
 ```
 
-3. 애플리케이션 실행
+4. 애플리케이션 실행
 ```bash
 ./gradlew bootRun
 ```
+
+### 로깅 설정 선택
+프로젝트는 두 가지 로깅 설정을 제공합니다:
+
+1. **기본 설정** (권장): Spring Boot 기본 로깅 사용
+   - 별도 설정 불필요
+   - `application.yml`의 설정만으로 충분
+
+2. **고급 설정**: Logback XML 사용
+   - `logback-spring.xml` 파일 사용
+   - 환경별 상세 설정 가능
+   - 문제 발생 시 `LOGGING_TROUBLESHOOTING.md` 참조
 
 ### API 문서
 애플리케이션 실행 후 아래 URL에서 API 문서를 확인할 수 있습니다:

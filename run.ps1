@@ -18,6 +18,9 @@ function Show-Help {
 
 function Build-Application {
     Write-Host "Building application..." -ForegroundColor Green
+    if (-not (Test-Path "logs")) {
+        New-Item -ItemType Directory -Path "logs" | Out-Null
+    }
     .\gradlew.bat clean build -x test
 }
 

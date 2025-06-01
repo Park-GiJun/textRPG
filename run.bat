@@ -29,6 +29,7 @@ goto end
 
 :build
 echo Building application...
+if not exist logs mkdir logs
 call gradlew.bat clean build -x test
 goto end
 

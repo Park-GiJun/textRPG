@@ -2,6 +2,7 @@ package com.gijun.textrpg.adapter.out.persistence
 
 import com.gijun.textrpg.application.port.out.CharacterRepository
 import com.gijun.textrpg.domain.character.Character
+import com.gijun.textrpg.domain.character.Experience
 import com.gijun.textrpg.domain.character.Health
 import com.gijun.textrpg.domain.character.Stats
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,10 @@ class CharacterRepositoryImpl(
         return r2dbcRepository.existsById(id)
     }
 
+    override suspend fun existsByName(name: String): Boolean {
+        return r2dbcRepository.existsByName(name)
+    }
+
     override suspend fun count(): Long {
         return r2dbcRepository.count()
     }
@@ -59,6 +64,7 @@ class CharacterRepositoryImpl(
 // R2DBC Repository Interface
 interface CharacterR2dbcRepository : CoroutineCrudRepository<CharacterEntity, String> {
     suspend fun findByName(name: String): CharacterEntity?
+    suspend fun existsByName(name: String): Boolean
     fun findByLevelBetween(minLevel: Int, maxLevel: Int): Flow<CharacterEntity>
 }
 
@@ -74,15 +80,24 @@ data class CharacterEntity(
     @Column("level")
     val level: Int,
     
-    @Column("experience")
-    val experience: Long,
+    // Experience fields
+    @Column("current_experience")
+    val currentExperience: Long,
     
+    @Column("max_experience")
+    val maxExperience: Long,
+    
+    @Column("experience_for_next_level")
+    val experienceForNextLevel: Long,
+    
+    // Health fields
     @Column("current_health")
     val currentHealth: Int,
     
     @Column("max_health")
     val maxHealth: Int,
     
+    // Stats fields
     @Column("strength")
     val strength: Int,
     
@@ -92,8 +107,8 @@ data class CharacterEntity(
     @Column("intelligence")
     val intelligence: Int,
     
-    @Column("vitality")
-    val vitality: Int,
+    @Column("luck")
+    val luck: Int,
     
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
@@ -114,7 +129,11 @@ class CharacterMapper {
             id = entity.id,
             name = entity.name,
             level = entity.level,
-            experience = entity.experience,
+            experience = Experience(
+                current = entity.currentExperience,
+                max = entity.maxExperience,
+                forNextLevel = entity.experienceForNextLevel
+            ),
             health = Health(
                 current = entity.currentHealth,
                 max = entity.maxHealth
@@ -123,7 +142,7 @@ class CharacterMapper {
                 strength = entity.strength,
                 dexterity = entity.dexterity,
                 intelligence = entity.intelligence,
-                vitality = entity.vitality
+                luck = entity.luck
             ),
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt
@@ -135,13 +154,15 @@ class CharacterMapper {
             id = domain.id,
             name = domain.name,
             level = domain.level,
-            experience = domain.experience,
+            currentExperience = domain.experience.current,
+            maxExperience = domain.experience.max,
+            experienceForNextLevel = domain.experience.forNextLevel,
             currentHealth = domain.health.current,
             maxHealth = domain.health.max,
             strength = domain.stats.strength,
             dexterity = domain.stats.dexterity,
             intelligence = domain.stats.intelligence,
-            vitality = domain.stats.vitality,
+            luck = domain.stats.luck,
             createdAt = domain.createdAt,
             updatedAt = domain.updatedAt
         )

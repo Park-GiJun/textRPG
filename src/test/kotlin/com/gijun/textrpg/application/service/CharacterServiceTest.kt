@@ -5,8 +5,6 @@ import com.gijun.textrpg.application.port.out.CharacterCachePort
 import com.gijun.textrpg.application.port.out.CharacterEventPublisher
 import com.gijun.textrpg.application.port.out.CharacterRepository
 import com.gijun.textrpg.domain.character.Character
-import com.gijun.textrpg.domain.character.Health
-import com.gijun.textrpg.domain.character.Stats
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList

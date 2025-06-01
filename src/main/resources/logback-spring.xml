@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  Simple Logback configuration for TextRPG
+  For advanced configuration, see logback-spring-advanced.xml
+-->
+<configuration>
+    <!-- Spring Boot의 기본 설정 포함 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- 로그 파일 위치 -->
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-logs}/textrpg.log}"/>
+    
+    <!-- 콘솔 출력 설정 -->
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    
+    <!-- 파일 출력 설정 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Spring Profile: local (개발 환경) -->
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+        
+        <logger name="com.gijun.textrpg" level="DEBUG"/>
+        <logger name="org.springframework.r2dbc" level="DEBUG"/>
+    </springProfile>
+    
+    <!-- Spring Profile: dev, prod (운영 환경) -->
+    <springProfile name="dev,prod">
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+        
+        <logger name="com.gijun.textrpg" level="INFO"/>
+        <logger name="org.springframework" level="WARN"/>
+    </springProfile>
+    
+    <!-- 기본 설정 (프로필이 지정되지 않은 경우) -->
+    <springProfile name="!local,!dev,!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+        
+        <logger name="com.gijun.textrpg" level="DEBUG"/>
+    </springProfile>
+</configuration>

@@ -1,9 +1,10 @@
 package com.gijun.textrpg.application.port.`in`
 
 import com.gijun.textrpg.domain.character.Character
+import com.gijun.textrpg.domain.character.Stats
 import kotlinx.coroutines.flow.Flow
 
-// Inbound Port Example - Use Case Interface
+// Character Management Use Case
 interface ManageCharacterUseCase {
     
     suspend fun createCharacter(command: CreateCharacterCommand): Character
@@ -22,30 +23,25 @@ interface ManageCharacterUseCase {
 // Command objects for use cases
 data class CreateCharacterCommand(
     val name: String,
-    val strength: Int = 10,
-    val dexterity: Int = 10,
-    val intelligence: Int = 10,
-    val vitality: Int = 10
+    val customStats: Stats? = null // null이면 기본 스탯 사용
 ) {
     init {
         require(name.isNotBlank()) { "Name cannot be blank" }
         require(name.length <= 50) { "Name cannot exceed 50 characters" }
+        require(!name.matches(Regex(".*[<>\"'&].*"))) { "Name contains invalid characters" }
     }
 }
 
 data class UpdateCharacterCommand(
     val characterId: String,
-    val name: String? = null,
-    val level: Int? = null
+    val name: String? = null
 ) {
     init {
         require(characterId.isNotBlank()) { "Character ID cannot be blank" }
         name?.let {
             require(it.isNotBlank()) { "Name cannot be blank" }
             require(it.length <= 50) { "Name cannot exceed 50 characters" }
-        }
-        level?.let {
-            require(it > 0) { "Level must be positive" }
+            require(!it.matches(Regex(".*[<>\"'&].*"))) { "Name contains invalid characters" }
         }
     }
 }

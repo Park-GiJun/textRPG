@@ -15,6 +15,7 @@ help:
 
 # Build the application
 build:
+	mkdir -p logs
 	./gradlew clean build -x test
 
 # Run tests

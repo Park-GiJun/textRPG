@@ -1,21 +1,46 @@
--- Character table
+-- Character table with new structure
 CREATE TABLE IF NOT EXISTS characters (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     level INT NOT NULL DEFAULT 1,
-    experience BIGINT NOT NULL DEFAULT 0,
+    
+    -- Experience fields
+    current_experience BIGINT NOT NULL DEFAULT 0,
+    max_experience BIGINT NOT NULL DEFAULT 100,
+    experience_for_next_level BIGINT NOT NULL DEFAULT 100,
+    
+    -- Health fields
     current_health INT NOT NULL,
     max_health INT NOT NULL,
+    
+    -- Stats fields
     strength INT NOT NULL DEFAULT 10,
     dexterity INT NOT NULL DEFAULT 10,
     intelligence INT NOT NULL DEFAULT 10,
-    vitality INT NOT NULL DEFAULT 10,
+    luck INT NOT NULL DEFAULT 5,
+    
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     version BIGINT DEFAULT 0,
+    
     INDEX idx_name (name),
     INDEX idx_level (level),
     INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Character Status table (for status effects)
+CREATE TABLE IF NOT EXISTS character_statuses (
+    id VARCHAR(36) PRIMARY KEY,
+    character_id VARCHAR(36) NOT NULL,
+    status_type VARCHAR(20) NOT NULL,
+    intensity INT NOT NULL DEFAULT 1,
+    duration INT NOT NULL,
+    max_duration INT NOT NULL,
+    stackable BOOLEAN NOT NULL DEFAULT FALSE,
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE,
+    INDEX idx_character_status (character_id, status_type),
+    INDEX idx_duration (duration)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Skills table

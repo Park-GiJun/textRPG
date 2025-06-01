@@ -51,8 +51,17 @@ if ($LASTEXITCODE -eq 0) {
     exit 1
 }
 
+# Create logs directory
+Write-Host "2. Creating logs directory..." -ForegroundColor Cyan
+if (-not (Test-Path "logs")) {
+    New-Item -ItemType Directory -Path "logs" | Out-Null
+    Write-Host "   [✓] Logs directory created" -ForegroundColor Green
+} else {
+    Write-Host "   [✓] Logs directory already exists" -ForegroundColor Green
+}
+
 # Wait for services
-Write-Host "2. Waiting for services to be ready..." -ForegroundColor Cyan
+Write-Host "3. Waiting for services to be ready..." -ForegroundColor Cyan
 $services = @{
     "MySQL" = @{Port = 3306; Host = "localhost"}
     "Redis" = @{Port = 6379; Host = "localhost"}
@@ -86,7 +95,7 @@ foreach ($service in $services.Keys) {
 }
 
 Write-Host ""
-Write-Host "3. Building application..." -ForegroundColor Cyan
+Write-Host "4. Building application..." -ForegroundColor Cyan
 .\gradlew.bat build -x test
 
 if ($LASTEXITCODE -eq 0) {

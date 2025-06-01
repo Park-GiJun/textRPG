@@ -3,6 +3,7 @@ package com.gijun.textrpg.adapter.`in`.web
 import com.gijun.textrpg.application.port.`in`.CreateCharacterCommand
 import com.gijun.textrpg.application.port.`in`.ManageCharacterUseCase
 import com.gijun.textrpg.application.port.`in`.UpdateCharacterCommand
+import com.gijun.textrpg.domain.character.Stats
 import jakarta.validation.Valid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,12 +22,19 @@ class CharacterController(
     suspend fun createCharacter(
         @Valid @RequestBody request: CreateCharacterRequest
     ): ResponseEntity<CharacterResponse> {
+        val customStats = if (request.strength != null || request.dexterity != null || 
+                             request.intelligence != null || request.luck != null) {
+            Stats(
+                strength = request.strength ?: 10,
+                dexterity = request.dexterity ?: 10,
+                intelligence = request.intelligence ?: 10,
+                luck = request.luck ?: 5
+            )
+        } else null
+
         val command = CreateCharacterCommand(
             name = request.name,
-            strength = request.strength ?: 10,
-            dexterity = request.dexterity ?: 10,
-            intelligence = request.intelligence ?: 10,
-            vitality = request.vitality ?: 10
+            customStats = customStats
         )
 
         val character = manageCharacterUseCase.createCharacter(command)
@@ -52,8 +60,7 @@ class CharacterController(
     ): ResponseEntity<CharacterResponse> {
         val command = UpdateCharacterCommand(
             characterId = id,
-            name = request.name,
-            level = request.level
+            name = request.name
         )
 
         val character = manageCharacterUseCase.updateCharacter(command)
@@ -95,12 +102,11 @@ data class CreateCharacterRequest(
     val strength: Int? = null,
     val dexterity: Int? = null,
     val intelligence: Int? = null,
-    val vitality: Int? = null
+    val luck: Int? = null
 )
 
 data class UpdateCharacterRequest(
-    val name: String? = null,
-    val level: Int? = null
+    val name: String? = null
 )
 
 data class GainExperienceRequest(
@@ -116,7 +122,7 @@ data class CharacterResponse(
     val id: String,
     val name: String,
     val level: Int,
-    val experience: Long,
+    val experience: ExperienceResponse,
     val health: HealthResponse,
     val stats: StatsResponse,
     val createdAt: String,
@@ -128,7 +134,12 @@ data class CharacterResponse(
                 id = character.id,
                 name = character.name,
                 level = character.level,
-                experience = character.experience,
+                experience = ExperienceResponse(
+                    current = character.experience.current,
+                    max = character.experience.max,
+                    forNextLevel = character.experience.forNextLevel,
+                    percentage = character.experience.percentage()
+                ),
                 health = HealthResponse(
                     current = character.health.current,
                     max = character.health.max,
@@ -138,7 +149,7 @@ data class CharacterResponse(
                     strength = character.stats.strength,
                     dexterity = character.stats.dexterity,
                     intelligence = character.stats.intelligence,
-                    vitality = character.stats.vitality,
+                    luck = character.stats.luck,
                     totalPower = character.stats.totalPower()
                 ),
                 createdAt = character.createdAt.toString(),
@@ -147,6 +158,13 @@ data class CharacterResponse(
         }
     }
 }
+
+data class ExperienceResponse(
+    val current: Long,
+    val max: Long,
+    val forNextLevel: Long,
+    val percentage: Float
+)
 
 data class HealthResponse(
     val current: Int,
@@ -158,6 +176,6 @@ data class StatsResponse(
     val strength: Int,
     val dexterity: Int,
     val intelligence: Int,
-    val vitality: Int,
+    val luck: Int,
     val totalPower: Int
 )

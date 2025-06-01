@@ -3,7 +3,7 @@ package com.gijun.textrpg.application.port.out
 import com.gijun.textrpg.domain.character.Character
 import kotlinx.coroutines.flow.Flow
 
-// Outbound Port Example - Repository Interface
+// Character Repository Port
 interface CharacterRepository {
     
     suspend fun save(character: Character): Character
@@ -19,6 +19,8 @@ interface CharacterRepository {
     suspend fun deleteById(id: String)
     
     suspend fun existsById(id: String): Boolean
+    
+    suspend fun existsByName(name: String): Boolean
     
     suspend fun count(): Long
 }
@@ -43,14 +45,4 @@ interface CharacterCachePort {
     suspend fun evictCharacter(id: String)
     
     suspend fun evictAll()
-}
-
-// External Service Port Example
-interface NotificationPort {
-    
-    suspend fun sendNotification(userId: String, message: String)
-    
-    suspend fun sendEmail(email: String, subject: String, body: String)
-    
-    suspend fun sendSlackMessage(channel: String, message: String)
 }

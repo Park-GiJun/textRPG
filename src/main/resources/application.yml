@@ -74,11 +74,12 @@ management:
 # Logging 설정
 logging:
   level:
+    root: INFO
     com.gijun.textrpg: DEBUG
-    org.springframework.r2dbc: DEBUG
-    io.r2dbc.mysql: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    path: logs
+  # 고급 Logback 설정을 사용하려면 아래 주석 해제
+  # config: classpath:logback-spring-advanced.xml
 
 # Sentry 설정
 sentry:
